@@ -1,0 +1,1 @@
+Hello,This is my 5th task of creating a web page that fetches weather data from a weather API based on the user's location or a user-inputted location and Display the current weather conditions, temperature, and other relevant information by using HTML,CSS,Javascript.
