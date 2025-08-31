@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to left, #0e7488, #0a2d44);
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .weather-app {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(14, 0, 0, 0.3);
+        }
+
+        input {
+            padding: 10px;
+            width: 70%;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: #ff9800;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        button:hover {
+            background: #573812;
+        }
+
+        .weather-info {
+            margin-top: 20px;
+        }
+
+        .icon {
+            width: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="weather-app">
+        <h2>🌦 Weather App</h2>
+        <div>
+            <input type="text" id="cityInput" placeholder="Enter city name">
+            <button id="searchBtn" onclick="getWeatherByCity()">Search</button>
+            <br>
+            <button id="locationBtn" onclick="getWeatherByLocation()">📍 Current Location</button>
+
+        </div>
+
+        <div class="weather-info" id="weatherInfo">
+            <p>Enter a city name or use your current location</p>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "0ee5713d572588d242fd44339e09b52b";
+        const weatherInfo = document.getElementById("weatherInfo");
+
+        // Fetch weather by city name
+        async function getWeatherByCity() {
+            const city = document.getElementById("cityInput").value;
+            if (!city) {
+                weatherInfo.innerHTML = "<p>Please enter a city name.</p>";
+                return;
+            }
+            fetchWeather(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+        }
+
+        // Fetch weather by user location
+        function getWeatherByLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const { latitude, longitude } = position.coords;
+                    fetchWeather(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`);
+                }, () => {
+                    weatherInfo.innerHTML = "<p>Location access denied.</p>";
+                });
+            } else {
+                weatherInfo.innerHTML = "<p>Geolocation not supported.</p>";
+            }
+        }
+
+        // Fetch and display weather data
+        async function fetchWeather(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error("City not found");
+                }
+                const data = await response.json();
+
+                // Custom display
+                weatherInfo.innerHTML = `
+            <h3>Weather at your location</h3>
+            <p>Nearest city: ${data.name}</p>
+            <p>Temperature: ${(data.main.temp - 273.15).toFixed(1)} °C</p>
+            <p>Condition: ${data.weather[0].description}</p>
+        `;
+            } catch (error) {
+                weatherInfo.innerHTML = `<p>${error.message}</p>`;
+            }
+        }
+
+
+        // Display weather info
+        function displayWeather(data) {
+            const { name, main, weather, wind } = data;
+            const icon = `https://openweathermap.org/img/wn/${weather[0].icon}@2x.png`;
+            weatherInfo.innerHTML = `
+        <h3>${name}</h3>
+        <img class="icon" src="${icon}" alt="${weather[0].description}">
+        <p><b>${weather[0].main}</b> - ${weather[0].description}</p>
+        <p>🌡 Temperature: ${main.temp}°C</p>
+        <p>💧 Humidity: ${main.humidity}%</p>
+        <p>💨 Wind Speed: ${wind.speed} m/s</p>
+      `;
+        }
+    </script>
+</body>
+
+</html>
